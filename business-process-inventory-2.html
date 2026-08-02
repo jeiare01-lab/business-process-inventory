@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Process Inventory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Georgia, serif;
+            background-color: #FEF9F3;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0D1B3D;
+            color: #FEF9F3;
+            padding: 30px;
+            margin: -40px -40px 30px -40px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left h1 { font-size: 28px; margin-bottom: 5px; }
+        .header-left p { font-size: 14px; opacity: 0.9; }
+        .header-right { display: flex; gap: 10px; }
+        .cmd-center-btn {
+            background: rgba(230, 81, 0, 0.8);
+            color: white;
+            border: 2px solid #E65100;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .cmd-center-btn:hover {
+            background: #E65100;
+            transform: scale(1.05);
+        }
+        .step-indicator { text-align: center; color: #E65100; font-weight: bold; margin-bottom: 20px; font-size: 16px; }
+        .step-content { margin: 30px 0; }
+        .step-content h2 { color: #0D1B3D; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #E65100; padding-bottom: 10px; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-weight: bold; color: #0D1B3D; margin-bottom: 8px; font-size: 14px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .process-list { background: #FEF9F3; padding: 15px; border-radius: 4px; border-left: 4px solid #E65100; margin-bottom: 20px; }
+        .process-item { background: white; padding: 12px 15px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; }
+        .process-item button { background-color: #E65100; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
+        .add-process-btn { background-color: #E65100; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 10px; }
+        .buttons { display: flex; gap: 10px; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-primary { background-color: #E65100; color: white; }
+        .btn-primary:hover { background-color: #d64600; }
+        .btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn-secondary { background-color: #ccc; color: #333; }
+        .btn-secondary:hover { background-color: #bbb; }
+        .summary-box { background: #0D1B3D; color: #FEF9F3; padding: 20px; border-radius: 4px; margin: 20px 0; }
+        .summary-box h3 { margin-bottom: 10px; color: #E65100; }
+        .summary-box p { margin-bottom: 8px; }
+        .info-box { background: #FEF9F3; border-left: 4px solid #E65100; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .success-msg { background: #4CAF50; color: white; padding: 15px; border-radius: 4px; margin: 15px 0; display: none; }
+        .error-msg { background: #f44336; color: white; padding: 15px; border-radius: 4px; margin: 15px 0; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>📋 BUSINESS PROCESS INVENTORY</h1>
+                <p>Discover Your Processes - AI Business Process Army</p>
+            </div>
+            <div class="header-right">
+                <button class="cmd-center-btn" onclick="openCommandCenter()">📡 COMMAND CENTER</button>
+            </div>
+        </div>
+
+        <div class="step-indicator" id="stepIndicator">Step 0 of 9</div>
+
+        <!-- STEP 0: INVENTORY -->
+        <div class="step-content" id="step0">
+            <h2>STEP 0: INVENTORY YOUR PROCESSES</h2>
+            <p style="margin-bottom: 20px;">List all the business processes you work with regularly.</p>
+
+            <div class="form-group">
+                <label>Add a process:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="processInput" placeholder="e.g., Purchase Order Processing">
+                    <button class="add-process-btn" onclick="addProcess()">+ Add</button>
+                </div>
+            </div>
+
+            <div class="process-list">
+                <strong>Your Processes:</strong>
+                <div id="processList" style="margin-top: 10px;">
+                    <p style="color: #999;">Add processes here</p>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
+                <button class="btn btn-primary" id="next0Btn" onclick="goToStep(1)" disabled>Proceed →</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: CHOOSE -->
+        <div class="step-content" id="step1" style="display: none;">
+            <h2>STEP 1: CHOOSE YOUR PROCESS</h2>
+
+            <div class="form-group">
+                <label>Select process: *</label>
+                <select id="selectedProcess" onchange="updateProcessInfo()">
+                    <option value="">-- Choose --</option>
+                </select>
+            </div>
+
+            <div id="processDetail" style="display: none;">
+                <div class="form-group">
+                    <label>Why selected? *</label>
+                    <textarea id="whySelected" onchange="checkStep1()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>How often? (e.g., 1000/month) *</label>
+                    <input type="text" id="frequency" onchange="checkStep1()">
+                </div>
+
+                <div class="form-group">
+                    <label>Cycle time? (e.g., 52 min) *</label>
+                    <input type="text" id="cycleTime" onchange="checkStep1()">
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(0)">← Back</button>
+                <button class="btn btn-primary" id="next1Btn" onclick="goToStep(2)" disabled>Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: STAKEHOLDERS -->
+        <div class="step-content" id="step2" style="display: none;">
+            <h2>STEP 2: IDENTIFY STAKEHOLDERS</h2>
+
+            <div class="form-group">
+                <label>Initiators</label>
+                <textarea id="initiators"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Doers</label>
+                <textarea id="doers"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Approvers</label>
+                <textarea id="approvers"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Users</label>
+                <textarea id="users"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Systems</label>
+                <textarea id="systems"></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(3)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: MAP -->
+        <div class="step-content" id="step3" style="display: none;">
+            <h2>STEP 3: MAP YOUR PROCESS</h2>
+
+            <div class="form-group">
+                <label>Process steps (with times): *</label>
+                <textarea id="processSteps" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Decision points</label>
+                <textarea id="decisions"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Number of handoffs: *</label>
+                <input type="number" id="handoffs" required>
+            </div>
+
+            <div class="form-group">
+                <label>Total cycle time: *</label>
+                <input type="text" id="totalCycleTime" required>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(4)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: QUANTIFY -->
+        <div class="step-content" id="step4" style="display: none;">
+            <h2>STEP 4: QUANTIFY CURRENT STATE</h2>
+
+            <div class="form-group">
+                <label>Monthly volume: *</label>
+                <input type="number" id="volume" onchange="calcMetrics()" required>
+            </div>
+
+            <div class="form-group">
+                <label>Time per transaction (min): *</label>
+                <input type="number" id="timePerTransaction" onchange="calcMetrics()" required>
+            </div>
+
+            <div class="form-group">
+                <label>Error rate (%): *</label>
+                <input type="number" id="errorRate" required>
+            </div>
+
+            <div class="summary-box">
+                <h3>CURRENT STATE</h3>
+                <p><strong>Monthly hours:</strong> <span id="monthlyHours">--</span> hrs</p>
+                <p><strong>Monthly cost:</strong> $<span id="monthlyCost">--</span></p>
+                <p><strong>Annual cost:</strong> $<span id="annualCost">--</span></p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(5)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 5: OPPORTUNITIES -->
+        <div class="step-content" id="step5" style="display: none;">
+            <h2>STEP 5: IDENTIFY AI OPPORTUNITIES</h2>
+
+            <div class="form-group">
+                <label>Opportunity 1: *</label>
+                <textarea id="opp1" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Time saved (min)</label>
+                <input type="number" id="opp1Time">
+            </div>
+
+            <div class="form-group">
+                <label>Opportunity 2:</label>
+                <textarea id="opp2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Time saved (min)</label>
+                <input type="number" id="opp2Time">
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(4)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(6)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 6: QUICK WIN -->
+        <div class="step-content" id="step6" style="display: none;">
+            <h2>STEP 6-7: CHOOSE YOUR QUICK WIN</h2>
+
+            <div class="form-group">
+                <label>Quick win focus: *</label>
+                <textarea id="quickWin" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Project name: *</label>
+                <input type="text" id="projectName" required>
+            </div>
+
+            <div class="form-group">
+                <label>New time per transaction (min): *</label>
+                <input type="number" id="newTime" onchange="calcImpact()" required>
+            </div>
+
+            <div class="summary-box">
+                <h3>PROJECTED IMPACT</h3>
+                <p><strong>Time saved/transaction:</strong> <span id="timeSaved">--</span> min</p>
+                <p><strong>Monthly hours saved:</strong> <span id="monthlyHoursSaved">--</span> hrs</p>
+                <p><strong>Monthly savings:</strong> $<span id="monthlySavings">--</span></p>
+                <p><strong>Annual savings:</strong> $<span id="annualSavings">--</span></p>
+                <p><strong>Payback (months):</strong> <span id="payback">--</span></p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(5)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(7)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 7: PROPOSAL -->
+        <div class="step-content" id="step7" style="display: none;">
+            <h2>STEP 7: BUILD YOUR PROPOSAL</h2>
+
+            <div class="form-group">
+                <label>Problem statement: *</label>
+                <textarea id="problemStatement" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>AI solution: *</label>
+                <textarea id="aiSolution" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>New workflow: *</label>
+                <textarea id="newWorkflow" required></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(6)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(8)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 8: METRICS -->
+        <div class="step-content" id="step8" style="display: none;">
+            <h2>STEP 8: SUCCESS METRICS</h2>
+
+            <div class="form-group">
+                <label>New error rate (%): *</label>
+                <input type="number" id="newErrorRate" required>
+            </div>
+
+            <div class="form-group">
+                <label>New cycle time: *</label>
+                <input type="text" id="newCycleTime" required>
+            </div>
+
+            <div class="form-group">
+                <label>Implementation cost ($): *</label>
+                <input type="number" id="implCost" value="75000" required>
+            </div>
+
+            <div class="summary-box">
+                <h3>FINANCIAL SUMMARY</h3>
+                <p><strong>Annual savings:</strong> $<span id="finalSavings">--</span></p>
+                <p><strong>Payback period:</strong> <span id="finalPayback">--</span> months</p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(7)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(9)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- STEP 9: FINAL -->
+        <div class="step-content" id="step9" style="display: none;">
+            <h2>STEP 9: FINAL DETAILS & SUBMIT</h2>
+
+            <div class="form-group">
+                <label>Your name: *</label>
+                <input type="text" id="yourName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Your SBU: *</label>
+                <input type="text" id="yourSBU" required>
+            </div>
+
+            <div class="form-group">
+                <label>Champion sponsor (optional)</label>
+                <input type="text" id="champion">
+            </div>
+
+            <div class="success-msg" id="successMsg">✅ Proposal submitted to Command Center!</div>
+            <div class="error-msg" id="errorMsg">⚠️ Error submitting. Saved locally.</div>
+
+            <div class="summary-box">
+                <h3>✓ READY!</h3>
+                <p>All steps complete. Submit your proposal to the Command Center.</p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goToStep(8)">← Back</button>
+                <button class="btn btn-secondary" onclick="saveProgress()">💾 Save Locally</button>
+                <button class="btn btn-secondary" onclick="exportProposal()">📥 Export as Text</button>
+                <button class="btn btn-primary" onclick="submitToCommandCenter()">🚀 Send to Command Center</button>
+            </div>
+        </div>
+
+        <!-- COMMAND CENTER DASHBOARD -->
+        <div class="step-content" id="commandCenter" style="display: none;">
+            <h2>📡 COMMAND CENTER DASHBOARD</h2>
+            <p style="margin-bottom: 20px;">View all submitted proposals from Master Builders.</p>
+
+            <div class="form-group">
+                <label>Admin Password:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                    <button class="btn btn-primary" onclick="unlockDashboard()">Unlock</button>
+                </div>
+            </div>
+
+            <div id="dashboardContent" style="display: none;">
+                <div class="info-box">
+                    <strong>Total Submissions:</strong> <span id="totalCount">0</span><br>
+                    <strong>Last Updated:</strong> <span id="lastUpdated">--</span>
+                </div>
+
+                <div id="proposalsList" style="margin-top: 20px;">
+                    <!-- Proposals load here -->
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-secondary" onclick="closeCommandCenter()">← Back to Tool</button>
+                    <button class="btn btn-secondary" onclick="exportAllProposals()">📊 Export All (CSV)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let processes = [];
+        const STORAGE_KEY = 'processMapping_v3';
+        const ADMIN_PASSWORD = 'Army@2026';
+        const SUPABASE_URL = 'https://digavgdgdasnyzijlywn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZ2F2Z2RnZGFzbnl6aWpseXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTk3ODIsImV4cCI6MjEwMDIzNTc4Mn0.-YzCcI2DzbjoOOc8vAHug8jw1VCzfVhJs-P4HDodTH4';
+
+        function addProcess() {
+            const input = document.getElementById('processInput');
+            const process = input.value.trim();
+            if (!process) { alert('Enter a process name'); return; }
+            processes.push(process);
+            input.value = '';
+            renderProcessList();
+            updateProcessSelector();
+            checkStep0();
+        }
+
+        function removeProcess(index) {
+            processes.splice(index, 1);
+            renderProcessList();
+            updateProcessSelector();
+            checkStep0();
+        }
+
+        function renderProcessList() {
+            const list = document.getElementById('processList');
+            if (processes.length === 0) {
+                list.innerHTML = '<p style="color: #999;">Add processes here</p>';
+                return;
+            }
+            list.innerHTML = processes.map((p, i) => `
+                <div class="process-item">
+                    <span>${i + 1}. ${p}</span>
+                    <button onclick="removeProcess(${i})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function updateProcessSelector() {
+            const sel = document.getElementById('selectedProcess');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Choose --</option>' + 
+                processes.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+        }
+
+        function updateProcessInfo() {
+            const idx = document.getElementById('selectedProcess').value;
+            const detail = document.getElementById('processDetail');
+            if (idx === '') {
+                detail.style.display = 'none';
+            } else {
+                detail.style.display = 'block';
+            }
+            checkStep1();
+        }
+
+        function checkStep0() {
+            document.getElementById('next0Btn').disabled = processes.length < 3;
+        }
+
+        function checkStep1() {
+            const idx = document.getElementById('selectedProcess').value;
+            const why = document.getElementById('whySelected').value.trim();
+            const freq = document.getElementById('frequency').value.trim();
+            const cycle = document.getElementById('cycleTime').value.trim();
+            document.getElementById('next1Btn').disabled = !(idx && why && freq && cycle);
+        }
+
+        function calcMetrics() {
+            const vol = parseFloat(document.getElementById('volume').value) || 0;
+            const time = parseFloat(document.getElementById('timePerTransaction').value) || 0;
+            const mh = (vol * time) / 60;
+            const mc = mh * 50;
+            const ac = mc * 12;
+            
+            if (document.getElementById('monthlyHours')) document.getElementById('monthlyHours').textContent = Math.round(mh).toLocaleString();
+            if (document.getElementById('monthlyCost')) document.getElementById('monthlyCost').textContent = Math.round(mc).toLocaleString();
+            if (document.getElementById('annualCost')) document.getElementById('annualCost').textContent = Math.round(ac).toLocaleString();
+        }
+
+        function calcImpact() {
+            const vol = parseFloat(document.getElementById('volume').value) || 0;
+            const oldTime = parseFloat(document.getElementById('timePerTransaction').value) || 0;
+            const newTime = parseFloat(document.getElementById('newTime').value) || 0;
+            const saved = oldTime - newTime;
+            const mhSaved = (vol * saved) / 60;
+            const mSaved = mhSaved * 50;
+            const aSaved = mSaved * 12;
+            const implCost = parseFloat(document.getElementById('implCost').value) || 75000;
+            const pb = aSaved > 0 ? (implCost / aSaved * 12).toFixed(1) : 0;
+            
+            if (document.getElementById('timeSaved')) document.getElementById('timeSaved').textContent = saved;
+            if (document.getElementById('monthlyHoursSaved')) document.getElementById('monthlyHoursSaved').textContent = Math.round(mhSaved).toLocaleString();
+            if (document.getElementById('monthlySavings')) document.getElementById('monthlySavings').textContent = Math.round(mSaved).toLocaleString();
+            if (document.getElementById('annualSavings')) document.getElementById('annualSavings').textContent = Math.round(aSaved).toLocaleString();
+            if (document.getElementById('payback')) document.getElementById('payback').textContent = pb;
+            if (document.getElementById('finalSavings')) document.getElementById('finalSavings').textContent = Math.round(aSaved).toLocaleString();
+            if (document.getElementById('finalPayback')) document.getElementById('finalPayback').textContent = pb;
+        }
+
+        function goToStep(step) {
+            for (let i = 0; i <= 9; i++) {
+                const el = document.getElementById(`step${i}`);
+                if (el) el.style.display = 'none';
+            }
+            document.getElementById(`commandCenter`).style.display = 'none';
+            
+            const el = document.getElementById(`step${step}`);
+            if (el) el.style.display = 'block';
+            
+            const labels = ['Inventory', 'Choose', 'Stakeholders', 'Map', 'Quantify', 'Opportunities', 'Quick Win', 'Proposal', 'Metrics', 'Submit'];
+            document.getElementById('stepIndicator').textContent = `Step ${step}: ${labels[step]} (${step} of 9)`;
+            
+            window.scrollTo(0, 0);
+            currentStep = step;
+            
+            if (step === 4) calcMetrics();
+            if (step === 6) calcImpact();
+            if (step === 8) calcImpact();
+            
+            saveProgress();
+        }
+
+        function saveProgress() {
+            const data = { step: currentStep, processes: processes, fields: {} };
+            document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+                data.fields[el.id] = el.value;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+            const data = JSON.parse(saved);
+            processes = data.processes || [];
+            renderProcessList();
+            updateProcessSelector();
+            Object.keys(data.fields || {}).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = data.fields[id];
+            });
+            goToStep(data.step || 0);
+        }
+
+        function resetAll() {
+            if (confirm('Reset all data?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        async function submitToCommandCenter() {
+            const name = document.getElementById('yourName').value;
+            if (!name) { alert('Please fill in your name'); return; }
+            
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            try {
+                const proposal = buildProposal();
+                const payload = {
+                    builder_name: name,
+                    sbu: document.getElementById('yourSBU').value || 'N/A',
+                    process_name: processes[parseInt(document.getElementById('selectedProcess').value)] || 'N/A',
+                    project_name: document.getElementById('projectName').value || 'N/A',
+                    proposal_text: proposal,
+                    submitted_at: new Date().toISOString()
+                };
+                
+                console.log('📤 Sending:', payload);
+                
+                const response = await fetch(
+                    'https://digavgdgdasnyzijlywn.supabase.co/rest/v1/process_proposals',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZ2F2Z2RnZGFzbnl6aWpseXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTk3ODIsImV4cCI6MjEwMDIzNTc4Mn0.-YzCcI2DzbjoOOc8vAHug8jw1VCzfVhJs-P4HDodTH4',
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+                
+                const statusCode = response.status;
+                console.log('📬 Response status:', statusCode);
+                
+                if (statusCode >= 200 && statusCode < 300) {
+                    console.log('✅ SUCCESS!');
+                    successMsg.style.display = 'block';
+                    errorMsg.style.display = 'none';
+                    
+                    // Clear local storage after successful submission
+                    setTimeout(() => {
+                        localStorage.removeItem(STORAGE_KEY);
+                    }, 2000);
+                } else {
+                    const errBody = await response.text();
+                    console.error('❌ Server error:', statusCode, errBody);
+                    throw new Error(`Server returned ${statusCode}`);
+                }
+            } catch (error) {
+                console.error('❌ Submission failed:', error.message || error);
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+            }
+        }
+
+        function exportProposal() {
+            const name = document.getElementById('projectName').value || 'proposal';
+            const content = buildProposal();
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function buildProposal() {
+            const getVal = (id) => document.getElementById(id)?.value || '--';
+            return `PROPOSAL: ${getVal('projectName')}
+Owner: ${getVal('yourName')}
+SBU: ${getVal('yourSBU')}
+Champion: ${getVal('champion')}
+
+PROCESS: ${processes[parseInt(getVal('selectedProcess'))] || '--'}
+
+CURRENT STATE
+Volume: ${getVal('volume')} per month
+Time: ${getVal('timePerTransaction')} min
+Errors: ${getVal('errorRate')}%
+
+PROBLEM
+${getVal('problemStatement')}
+
+AI OPPORTUNITIES
+1. ${getVal('opp1')}
+2. ${getVal('opp2')}
+
+SOLUTION
+${getVal('aiSolution')}
+
+NEW WORKFLOW
+${getVal('newWorkflow')}
+
+EXPECTED RESULTS
+Time: ${getVal('newTime')} min
+Errors: ${getVal('newErrorRate')}%
+Cost: $${getVal('implCost')}
+
+ANNUAL SAVINGS: $${document.getElementById('finalSavings')?.textContent || '--'}
+PAYBACK: ${document.getElementById('finalPayback')?.textContent || '--'} months`;
+        }
+
+        function openCommandCenter() {
+            document.getElementById('commandCenter').style.display = 'block';
+            for (let i = 0; i <= 9; i++) {
+                const el = document.getElementById(`step${i}`);
+                if (el) el.style.display = 'none';
+            }
+            document.getElementById('stepIndicator').textContent = 'COMMAND CENTER';
+            window.scrollTo(0, 0);
+        }
+
+        function closeCommandCenter() {
+            goToStep(0);
+        }
+
+        async function unlockDashboard() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd !== ADMIN_PASSWORD) { alert('Wrong password'); return; }
+            
+            document.getElementById('dashboardContent').style.display = 'block';
+            await loadProposals();
+        }
+
+        async function loadProposals() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/process_proposals?order=submitted_at.desc`, {
+                    headers: { 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                const proposals = await response.json();
+                
+                document.getElementById('totalCount').textContent = proposals.length;
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                
+                const list = document.getElementById('proposalsList');
+                if (proposals.length === 0) {
+                    list.innerHTML = '<p style="color: #999;">No proposals yet</p>';
+                    return;
+                }
+                
+                list.innerHTML = proposals.map((p, i) => `
+                    <div class="summary-box">
+                        <h3>${i + 1}. ${p.builder_name} - ${p.project_name}</h3>
+                        <p><strong>SBU:</strong> ${p.sbu}</p>
+                        <p><strong>Process:</strong> ${p.process_name}</p>
+                        <p><strong>Submitted:</strong> ${new Date(p.submitted_at).toLocaleString()}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('proposalsList').innerHTML = '<p style="color: red;">Error loading proposals</p>';
+            }
+        }
+
+        async function exportAllProposals() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/process_proposals`, {
+                    headers: { 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                const proposals = await response.json();
+                let csv = 'Name,SBU,Process,Project,Submitted Date\n';
+                proposals.forEach(p => {
+                    csv += `"${p.builder_name}","${p.sbu}","${p.process_name}","${p.project_name}","${new Date(p.submitted_at).toLocaleString()}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'proposals.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Error exporting');
+            }
+        }
+
+        window.addEventListener('load', loadProgress);
+    </script>
+</body>
+</html>
